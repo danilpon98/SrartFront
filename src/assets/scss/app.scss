@@ -1,0 +1,35 @@
+@import 'config';
+@import "_mixins/fluid-font-size";
+
+::selection{
+  color: $accent;
+}
+
+body {
+  font-family: $userfont;
+  font-size: $fontsize;
+  line-height: $lineheight;
+  background-color: $bg-body;
+  color: $text-dark;
+  min-width: 320px;
+  position: relative;
+  -webkit-overflow-scrolling: touch;
+}
+
+.img-responsive{
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+// typography
+@import "modules/typography/header";
+@import "modules/typography/link";
+@import "modules/typography/paragraph";
+
+
+
+
+
+
+

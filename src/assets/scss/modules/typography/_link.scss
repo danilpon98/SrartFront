@@ -1,0 +1,18 @@
+a{
+  display: inline-block;
+  color: $link-color;
+  &:hover{
+    text-decoration: underline;
+  }
+}
+
+a.no-link-style{
+  color: inherit !important;
+  &:focus, &:visited{
+    color: inherit !important;
+  }
+  &:hover{
+    color: inherit !important;
+    text-decoration: none;
+  }
+}

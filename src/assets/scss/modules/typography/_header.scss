@@ -1,0 +1,19 @@
+h1,h2,h3,h4,h5{
+  color: $h-color;
+  line-height: 1.51;
+  margin-bottom: 25px;
+}
+
+h1{
+  @include fluid-font-size(21px, 28px, 480px, 1280px, 26px);
+}
+h2{
+  @include fluid-font-size(19px, 26px, 480px, 1280px, 23px);
+}
+h3{
+  @include fluid-font-size(18px, 21px, 480px, 1280px, 20px);
+}
+h4,h5{
+  @include fluid-font-size(16px, 18px, 480px, 1280px, 19px);
+}
+

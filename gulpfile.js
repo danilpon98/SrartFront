@@ -17,7 +17,8 @@ const notify = require("gulp-notify");
 const webpack = require('webpack');
 const webpackStream = require('webpack-stream');
 const browserSync = require("browser-sync").create();
-
+const filter = require('gulp-filter');
+const fs = require('fs');
 
 /* Paths */
 const srcPath = 'src/';
@@ -32,14 +33,14 @@ const path = {
         fonts:  distPath + "assets/fonts/"
     },
     src: {
-        html:   srcPath + "*.html",
-        js:     srcPath + "assets/js/*.js",
+        html:   srcPath + "*.hbs",
+        js:     srcPath + "assets/js/",
         css:    srcPath + "assets/scss/*.scss",
         images: srcPath + "assets/images/**/*.{jpg,png,svg,gif,ico,webp,webmanifest,xml,json}",
         fonts:  srcPath + "assets/fonts/**/*.{eot,woff,woff2,ttf,svg}"
     },
     watch: {
-        html:   srcPath + "**/*.html",
+        html:   srcPath + "**/*.hbs",
         js:     srcPath + "assets/js/**/*.js",
         css:    srcPath + "assets/scss/**/*.scss",
         images: srcPath + "assets/images/**/*.{jpg,png,svg,gif,ico,webp,webmanifest,xml,json}",
@@ -54,10 +55,11 @@ const path = {
 
 function serve() {
     browserSync.init({
-        server: {
-            baseDir: "./" + distPath
-        }
-    });
+        server: { baseDir: "./" + distPath },
+        notify: false,
+        online: true,
+        open: false,
+    })
 }
 
 function html(cb) {
@@ -70,6 +72,9 @@ function html(cb) {
             partials:   srcPath + 'partials/',
             helpers:    srcPath + 'helpers/',
             data:       srcPath + 'data/'
+        }))
+        .pipe(rename({
+            extname: ".html"
         }))
         .pipe(dest(path.build.html))
         .pipe(browserSync.reload({stream: true}));
@@ -137,8 +142,9 @@ function cssWatch(cb) {
     cb();
 }
 
-function js(cb) {
-    return src(path.src.js, {base: srcPath + 'assets/js/'})
+
+function pageJs(fileName) {
+    return src(path.src.js + fileName)
         .pipe(plumber({
             errorHandler : function(err) {
                 notify.onError({
@@ -149,49 +155,35 @@ function js(cb) {
             }
         }))
         .pipe(webpackStream({
-          mode: "production",
-          output: {
-            filename: 'app.js',
-          },
-          module: {
-            rules: [
-              {
-                test: /\.(js)$/,
-                exclude: /(node_modules)/,
-                loader: 'babel-loader',
-                query: {
-                  presets: ['@babel/preset-env']
-                }
-              }
-            ]
-          }
+            mode: "production",
+            output: {
+                filename: fileName,
+            },
+            module: {
+                rules: [
+                    {
+                        test: /\.(js)$/,
+                        exclude: /(node_modules)/,
+                        loader: 'babel-loader',
+                        query: {
+                            presets: ['@babel/preset-env'],
+                            plugins: ['babel-plugin-root-import']
+                        }
+                    }
+                ]
+            }
+        }))
+        .pipe(rename({
+            suffix: ".min",
         }))
         .pipe(dest(path.build.js))
-        .pipe(browserSync.reload({stream: true}));
-
-    cb();
 }
 
-function jsWatch(cb) {
-    return src(path.src.js, {base: srcPath + 'assets/js/'})
-        .pipe(plumber({
-            errorHandler : function(err) {
-                notify.onError({
-                    title:    "JS Error",
-                    message:  "Error: <%= error.message %>"
-                })(err);
-                this.emit('end');
-            }
-        }))
-        .pipe(webpackStream({
-          mode: "development",
-          output: {
-            filename: 'app.js',
-          }
-        }))
-        .pipe(dest(path.build.js))
-        .pipe(browserSync.reload({stream: true}));
-
+function js(cb) {
+    fs.readdirSync(path.src.js).filter(function(fileName) {
+        if (fileName.includes('.js')) pageJs(fileName);
+    })
+    browserSync.reload();
     cb();
 }
 
@@ -231,14 +223,13 @@ function clean(cb) {
 function watchFiles() {
     gulp.watch([path.watch.html], html);
     gulp.watch([path.watch.css], cssWatch);
-    gulp.watch([path.watch.js], jsWatch);
+    gulp.watch([path.watch.js], js);
     gulp.watch([path.watch.images], images);
     gulp.watch([path.watch.fonts], fonts);
 }
 
 const build = gulp.series(clean, gulp.parallel(html, css, js, images, fonts));
 const watch = gulp.parallel(build, watchFiles, serve);
-
 
 
 /* Exports Tasks */

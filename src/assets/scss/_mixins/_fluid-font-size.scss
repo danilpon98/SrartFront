@@ -1,0 +1,60 @@
+
+@function strip-unit($number) {
+  @if type-of($number) == 'number' and not unitless($number) {
+    @return $number / ($number * 0 + 1);
+  }
+
+  @return $number;
+}
+
+@function calc-fluid-font-size($f-min, $f-max, $w-min, $w-max) {
+  $f-min: strip-unit($f-min);
+  $f-max: strip-unit($f-max);
+  $w-min: strip-unit($w-min);
+  $w-max: strip-unit($w-max);
+  
+  $k: ($f-max - $f-min)/($w-max - $w-min);
+  $b: $f-min - $k * $w-min;
+
+  $b: $b + px;
+
+  @return calc( #{$k} * 100vw + #{$b} );
+}
+
+@mixin fluid-font-size($f-min, $f-max, $w-min, $w-max, $fallback: false) {
+  
+  font-size: $f-min;
+  
+  @media (min-width: $w-min) {
+    @if ($fallback) {
+      font-size: $fallback;
+    }
+    font-size: calc-fluid-font-size($f-min, $f-max, $w-min, $w-max);  
+  }
+  @media (min-width: $w-max) {
+    font-size: $f-max;
+  }
+}
+
+/* use
+
+@include fluid-font-size($f-min, $f-max, $w-min, $w-max, $fallback)
+
+$f-min - минимальный размер шрифта
+$f-max - максимальный размер шрифта
+$w-min - минимальное значение ширины экрана
+$w-max - максимальное значение ширины экрана
+$fallback - фолбек для старых браузеров
+
+scss
+.fluid-font-size {
+  @include fluid-font-size(16px, 24px, 480px, 1280px, 18px);
+}
+
+sass
+
+.fluid-font-size
+  @include fluid-font-size(16px, 24px, 480px, 1280px, 18px)
+
+
+*/
