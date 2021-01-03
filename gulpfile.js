@@ -26,25 +26,28 @@ const distPath = 'dist/';
 
 const path = {
     build: {
-        html:   distPath,
-        js:     distPath + "assets/js/",
-        css:    distPath + "assets/css/",
-        images: distPath + "assets/images/",
-        fonts:  distPath + "assets/fonts/"
+        html:     distPath,
+        js:       distPath + "assets/js/",
+        css:      distPath + "assets/css/",
+        images:   distPath + "assets/img/",
+        fonts:    distPath + "assets/fonts/",
+        favicon:  distPath
     },
     src: {
-        html:   srcPath + "*.hbs",
-        js:     srcPath + "assets/js/",
-        css:    srcPath + "assets/scss/*.scss",
-        images: srcPath + "assets/images/**/*.{jpg,png,svg,gif,ico,webp,webmanifest,xml,json}",
-        fonts:  srcPath + "assets/fonts/**/*.{eot,woff,woff2,ttf,svg}"
+        html:     srcPath + "*.hbs",
+        js:       srcPath + "assets/js/",
+        css:      srcPath + "assets/scss/*.scss",
+        images:   srcPath + "assets/img/**/*.{jpg,png,svg,gif,ico,webp,webmanifest,xml,json}",
+        fonts:    srcPath + "assets/fonts/**/*.{eot,woff,woff2,ttf,svg}",
+        favicon:  srcPath + "assets/favicon/**/*.*"
     },
     watch: {
-        html:   srcPath + "**/*.hbs",
-        js:     srcPath + "assets/js/**/*.js",
-        css:    srcPath + "assets/scss/**/*.scss",
-        images: srcPath + "assets/images/**/*.{jpg,png,svg,gif,ico,webp,webmanifest,xml,json}",
-        fonts:  srcPath + "assets/fonts/**/*.{eot,woff,woff2,ttf,svg}"
+        html:     srcPath + "**/*.hbs",
+        js:       srcPath + "assets/js/**/*.js",
+        css:      srcPath + "assets/scss/**/*.scss",
+        images:   srcPath + "assets/img/**/*.{jpg,png,svg,gif,ico,webp,webmanifest,xml,json}",
+        fonts:    srcPath + "assets/fonts/**/*.{eot,woff,woff2,ttf,svg}",
+        favicon:  srcPath + "assets/favicon/**/*.*"
     },
     clean: "./" + distPath
 }
@@ -191,7 +194,7 @@ function images(cb) {
     return src(path.src.images)
         .pipe(imagemin([
             imagemin.gifsicle({interlaced: true}),
-            imagemin.mozjpeg({quality: 95, progressive: true}),
+            imagemin.mozjpeg({quality: 80, progressive: true}),
             imagemin.optipng({optimizationLevel: 5}),
             imagemin.svgo({
                 plugins: [
@@ -214,6 +217,14 @@ function fonts(cb) {
     cb();
 }
 
+function favicon(cb) {
+    return src(path.src.favicon)
+        .pipe(dest(path.build.favicon))
+        .pipe(browserSync.reload({stream: true}));
+
+    cb();
+}
+
 function clean(cb) {
     return del(path.clean);
 
@@ -226,9 +237,10 @@ function watchFiles() {
     gulp.watch([path.watch.js], js);
     gulp.watch([path.watch.images], images);
     gulp.watch([path.watch.fonts], fonts);
+    gulp.watch([path.watch.favicon], favicon);
 }
 
-const build = gulp.series(clean, gulp.parallel(html, css, js, images, fonts));
+const build = gulp.series(clean, gulp.parallel(html, css, js, images, fonts, favicon));
 const watch = gulp.parallel(build, watchFiles, serve);
 
 
@@ -238,6 +250,7 @@ exports.css = css;
 exports.js = js;
 exports.images = images;
 exports.fonts = fonts;
+exports.favicon = favicon;
 exports.clean = clean;
 exports.build = build;
 exports.watch = watch;

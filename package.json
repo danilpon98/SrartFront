@@ -1,8 +1,8 @@
 {
-    "name": "brainscloud",
+    "name": "StartFront",
     "version": "1.0.0",
-    "description": "brainscloud",
-    "author": "brainscloud",
+    "description": "Starting Template",
+    "author": "DanilPon",
     "devDependencies": {
         "@babel/core": "^7.12.3",
         "@babel/preset-env": "^7.12.1",
@@ -30,7 +30,7 @@
         "webpack-stream": "^6.1.0"
     },
     "browserslist": [
-        "last 1 version",
+        "last 10 versions",
         "> 1%",
         "IE 10"
     ],
